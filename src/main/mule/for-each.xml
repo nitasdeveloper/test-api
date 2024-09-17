@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="dbc1ee08-f7b1-4b18-b105-be6206fdc15f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="for-eachFlow" doc:id="57694994-af79-4fe7-aad2-89120197d702" >
+		<http:listener doc:name="Listener" doc:id="677866cf-0a81-4ae4-b5d5-bde3d0ce42f1" config-ref="HTTP_Listener_config" path="test"/>
+		<ee:transform doc:name="Transform Message" doc:id="af131401-36b1-493a-9595-9c731e91e7ad" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+0 to 5]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="0" doc:name="Set Variable" doc:id="2fbc156c-a195-4c4a-99e5-488ce035e7bd" variableName="var1"/>
+		<foreach doc:name="For Each" doc:id="eddd8739-73fa-42c9-bfdc-cb70110c8955" >
+			<set-variable value="#[vars.var1 as Number + 1]" doc:name="Set Variable" doc:id="d15d5d19-360b-49c7-ac38-59c0c4711b42" variableName="var1"/>
+			<logger level="INFO" doc:name="Logger" doc:id="21b40e86-2565-4de7-9ed8-7ab17c7593af" message="inside for each: #[vars.var1]"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="9aa80ae8-335f-46c3-8d59-a3d2448307b9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "Successful message"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ab82cff1-e474-4310-865c-cdb01e54af80" message="outside for each: #[vars.var1]"/>
+	</flow>
+</mule>
